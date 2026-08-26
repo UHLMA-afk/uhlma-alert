@@ -1,0 +1,33 @@
+name: UHLMA Crossover Alert
+
+on:
+  schedule:
+    # alle 15 Minuten (an das INTERVAL unten anpassen, falls du ein anderes
+    # Chart-Intervall nutzt, z.B. */5 für 5m, */60 für 1h)
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}   # ermöglicht manuelles Starten über den "Run workflow"-Button
+
+jobs:
+  check-crossover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Abhängigkeiten installieren
+        run: pip install -r requirements.txt
+
+      - name: UHLMA prüfen und ggf. Alarm senden
+        env:
+          SYMBOL: "BTCUSDT"
+          INTERVAL: "15m"
+          LENGTH: "500"
+          MULT: "1.0"
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python uhlma_alert.py
