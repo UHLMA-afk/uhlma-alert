@@ -39,7 +39,11 @@ MULT = float(os.environ.get("MULT", "1.0"))
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
-BINANCE_URL = "https://api.binance.com/api/v3/klines"
+# data-api.binance.vision ist Binances offizielle Markdaten-API. Sie liefert
+# dieselben Kursdaten wie api.binance.com, wird aber (anders als api.binance.com)
+# i.d.R. nicht für Cloud-/Rechenzentrums-IPs wie z.B. GitHub Actions blockiert
+# (dort tritt sonst Fehler "451 Client Error" auf).
+BINANCE_URL = "https://data-api.binance.vision/api/v3/klines"
 
 
 # ---------------------------------------------------------------------------
