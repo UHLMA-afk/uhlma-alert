@@ -1,7 +1,4 @@
 
-/
-
-
 """
 UHLMA Crossover Alert - Multi-Instrument
 ==========================================
