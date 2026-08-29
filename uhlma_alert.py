@@ -2,29 +2,6 @@
 /
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Uhlma alert · PY
 """
 UHLMA Crossover Alert - Multi-Instrument
 ==========================================
