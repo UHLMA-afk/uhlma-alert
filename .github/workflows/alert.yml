@@ -1,5 +1,5 @@
 name: UHLMA Crossover Alert
- 
+
 on:
   schedule:
     # alle 15 Minuten (an das INTERVAL unten anpassen, falls du ein anderes
@@ -11,22 +11,26 @@ on:
         description: "Nur eine Testnachricht an Telegram senden (statt echter Prüfung)"
         type: boolean
         default: false
- 
+
 jobs:
   check-crossover:
     runs-on: ubuntu-latest
+    # Schreibrechte nötig, damit der Workflow den gespeicherten Zustand
+    # (state.json) am Ende zurück ins Repository speichern kann.
+    permissions:
+      contents: write
     steps:
       - name: Repository auschecken
         uses: actions/checkout@v4
- 
+
       - name: Python einrichten
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
- 
+
       - name: Abhängigkeiten installieren
         run: pip install -r requirements.txt
- 
+
       - name: UHLMA prüfen und ggf. Alarm senden
         env:
           INTERVAL: "15m"
@@ -36,3 +40,16 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TEST_MODE: ${{ inputs.test_notification }}
         run: python uhlma_alert.py
+
+      - name: Zustand (state.json) speichern
+        if: always()
+        run: |
+          if [ -f state.json ] && [ -n "$(git status --porcelain state.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add state.json
+            git commit -m "Zustand aktualisiert [skip ci]"
+            git push
+          else
+            echo "Keine Änderung an state.json, nichts zu speichern."
+          fi
