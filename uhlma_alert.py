@@ -225,6 +225,10 @@ def check_instrument(instrument: dict, state: dict):
     crossed_up = (prev_cts <= prev_cma) & (df["cts"] > df["cma"])
     crossed_down = (prev_cts >= prev_cma) & (df["cts"] < df["cma"])
 
+    last_row = df.iloc[-1]
+    print(f"[{display}] Aktuell: CTS={last_row['cts']:.4f}  CMA={last_row['cma']:.4f}  "
+          f"(Zeit: {df.index[-1]})")
+
     last_ts_str = state.get(key, {}).get("last_ts")
 
     if last_ts_str is None:
