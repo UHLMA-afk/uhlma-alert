@@ -66,6 +66,7 @@ INSTRUMENTS = [
 # Da Binance pro Anfrage max. 1000 Kerzen liefert, wird bei Bedarf paginiert.
 # ---------------------------------------------------------------------------
 def get_closes_binance(symbol: str, interval: str, min_bars: int) -> pd.Series:
+    """Liefert den SCHLUSSKURS (close) jeder Kerze."""
     all_rows = []
     end_time = None
     per_request = 1000
@@ -86,7 +87,7 @@ def get_closes_binance(symbol: str, interval: str, min_bars: int) -> pd.Series:
 
     seen = {row[0]: row for row in all_rows}
     rows_sorted = [seen[k] for k in sorted(seen.keys())]
-    closes = [float(row[4]) for row in rows_sorted]
+    closes = [float(row[4]) for row in rows_sorted]   # Index 4 = Close-Preis der Kerze
     close_times = [pd.to_datetime(row[6], unit="ms") for row in rows_sorted]
     return pd.Series(closes, index=close_times, name="close")
 
@@ -95,6 +96,7 @@ def get_closes_binance(symbol: str, interval: str, min_bars: int) -> pd.Series:
 # Kursdaten holen: Yahoo Finance (Aktien, Rohstoffe)
 # ---------------------------------------------------------------------------
 def get_closes_yfinance(symbol: str, interval: str) -> pd.Series:
+    """Liefert den SCHLUSSKURS (close) jeder Kerze."""
     # Yahoo erlaubt bei Intraday-Kerzen (z.B. 15m) max. ca. 60 Tage Historie
     intraday = interval in ("1m", "2m", "5m", "15m", "30m", "60m", "90m")
     period = "60d" if intraday else "2y"
@@ -199,7 +201,14 @@ def send_telegram(message: str):
 def check_instrument(instrument: dict, state: dict):
     display = instrument["display"]
     key = instrument["symbol"]
-    required_bars = 2 * LENGTH + 20
+    # Dieser Indikator ist ein rekursiver Filter, der sich an die komplette
+    # bisherige Kurshistorie "erinnert". TradingView rechnet dabei mit der
+    # kompletten Chart-Historie (oft Jahre), wir mit einem begrenzten Vorlauf.
+    # Je mehr Vorlauf-Kerzen wir laden, desto näher kommen unsere Werte an
+    # TradingView heran. Für Krypto (Binance) ist mehr Historie praktisch
+    # kostenlos verfügbar, daher hier ein großzügiger Standard-Vorlauf.
+    warmup_bars = int(os.environ.get("WARMUP_BARS", "6000"))
+    required_bars = max(2 * LENGTH + 20, warmup_bars)
 
     try:
         closes = get_closes(instrument, INTERVAL, min_bars=required_bars + 1)
