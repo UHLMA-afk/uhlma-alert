@@ -52,7 +52,7 @@ BINANCE_URL = "https://data-api.binance.vision/api/v3/klines"
 # source: "binance" (Krypto, sehr zuverlässig) oder "yfinance" (Aktien/Rohstoffe)
 INSTRUMENTS = [
     {"display": "Bitcoin",  "source": "binance",  "symbol": "BTCUSDT"},
-    {"display": "Ethereum", "source": "binance",  "symbol": "ETHUSDT"},
+    {"display": "Nasdaq 100", "source": "yfinance", "symbol": "NQ=F"},
     {"display": "Gold",     "source": "yfinance", "symbol": "GC=F"},
     {"display": "Silber",   "source": "yfinance", "symbol": "SI=F"},
     {"display": "Apple",    "source": "yfinance", "symbol": "AAPL"},
